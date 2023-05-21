@@ -1,0 +1,7 @@
+docs/build/
+docs/source/_static/
+docs/source/_autosummary/
+/build/
+__pycache__/
+/.mypy_cache/
+*.egg-info/

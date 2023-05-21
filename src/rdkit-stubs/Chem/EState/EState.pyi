@@ -1,0 +1,29 @@
+"""
+rdkit.Chem.EState.EState module¶
+Basic EState definitions
+"""
+from rdkit import Chem as Chem
+
+def EStateIndices(self, mol, force=True):
+    """
+    returns a tuple of EState indices for the molecule
+    Reference: Hall, Mohney and Kier. JCICS _31_ 76-81 (1991)"""
+    ...
+
+def GetPrincipleQuantumNumber(self, atNum):
+    """
+    Get principal quantum number for atom number"""
+    ...
+
+def MaxAbsEStateIndex(self, mol, force=1): ...
+def EStateIndices(self, mol, force=True):
+    """
+    returns a tuple of EState indices for the molecule
+    Reference: Hall, Mohney and Kier. JCICS _31_ 76-81 (1991)"""
+    ...
+
+def MaxEStateIndex(self, mol, force=1): ...
+def MinAbsEStateIndex(self, mol, force=1): ...
+def MinEStateIndex(self, mol, force=1): ...
+def MaxAbsEStateIndex(self, mol, force=1): ...
+def MinAbsEStateIndex(self, mol, force=1): ...

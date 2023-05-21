@@ -1,9 +1,0 @@
-"""
-rdkit.ML.Data.FindQuantBounds module¶
-"""
-from rdkit.Dbase import DbConnection as DbConnection
-from rdkit.ML.Data import Quantize as Quantize
-
-def Usage(self): ...
-def runIt(self, namesAndTypes, dbConnect, nBounds, resCol, typesToDo=["float"]): ...
-def Usage(self): ...

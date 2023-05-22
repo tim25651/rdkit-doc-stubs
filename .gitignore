@@ -5,3 +5,5 @@ docs/source/_autosummary/
 __pycache__/
 /.mypy_cache/
 *.egg-info/
+build_stubs/data.pkl
+src/rdkit-stubs/

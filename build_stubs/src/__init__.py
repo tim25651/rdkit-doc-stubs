@@ -1,6 +1,6 @@
 from .combine import combine
+from .download import get_data
 from .find import Find
-from .get_data import get_data
 from .monkey_ast import *
 from .parse import Parse
 from .unparse import unparse_module

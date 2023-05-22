@@ -1,9 +1,12 @@
 import builtins
 
+# List of modules which do not to have to be imported
 BUILTIN_TYPES = ["None", "NoneType"] + [
     k for k, v in builtins.__dict__.items() if isinstance(v, type)
 ]
 
+## HARD CODED
+# List of modules and their corresponding parent modules
 MODULES = {
     "_io": None,
     "Boost.Python": None,

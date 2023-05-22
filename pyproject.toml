@@ -12,7 +12,8 @@ dependencies = [
     "rdkit == 2023.3.1",
     "mypy",
     "isort",
-    "black"
+    "black",
+    "biopython"
 ]
 
 [project.urls]

@@ -1,57 +1,13 @@
 import re
-from dataclasses import dataclass
 from typing import Callable
 
 from bs4 import BeautifulSoup, Tag
 
-DOC_PATTERN: Callable[[str], str] = (
+from .classes import *
+
+DOCSTRING_PATTERN: Callable[[str], str] = (
     lambda x: r"(" + x + r"\(.*\)(?:\s*->\s*(.*?))?\s*:(?!:))"
 )
-
-
-@dataclass
-class FoundFunction:
-    name: str
-    params: list[str]
-    returns: str
-    doc: str
-    overloads: list[str] | None = None
-    method: bool | None = None
-    overload: bool | None = None
-
-
-@dataclass
-class FoundClass:
-    name: str
-    base: str
-    doc: str
-    subclasses: list["FoundClass"]
-    methods: list[FoundFunction]
-    attributes: list[str]
-    level: int | None = None
-
-
-@dataclass
-class FoundModule:
-    name: str
-    doc: str
-    imports: set[str]
-    functions: list[FoundFunction]
-    classes: list[FoundClass]
-
-
-@dataclass
-class FoundParam:
-    name: str
-    type: str
-    default: str
-
-
-@dataclass
-class FoundAttribute:
-    name: str
-    type: str
-    annotation: str
 
 
 class Find:
@@ -80,42 +36,42 @@ class Find:
         return [a.get_text().strip().replace("¶", "") for a in attributes]
 
     @staticmethod
-    def doc(node: Tag, classes: list[str]) -> str:
+    def docstring(node: Tag, classes: list[str]) -> str:
         first = node.find("dl", {"class": classes})
 
         if first:
-            doc_nodes = first.findPreviousSiblings()[::-1]
+            docstring_nodes = first.findPreviousSiblings()[::-1]
         else:
-            doc_nodes = node.findChildren(recursive=False)
+            docstring_nodes = node.findChildren(recursive=False)
 
-        doc = "\n".join([x.get_text() for x in doc_nodes[1:]])
+        docstring = "\n".join([x.get_text() for x in docstring_nodes[1:]])
 
-        return re.sub(r"\n\n\n+", "\n\n", doc).strip()
-
-    @staticmethod
-    def fn_doc(node: Tag) -> str:
-        text = node.find("dd").get_text()
-        return re.sub(r"\n\n\n+", "\n\n", text).strip()
+        return re.sub(r"\n\n\n+", "\n\n", docstring).strip()
 
     @staticmethod
-    def return_(node: Tag) -> str:
-        ret = node.find("span", class_="sig-return")
-        if ret:
-            return ret.get_text().strip()
+    def func_docstring(node: Tag) -> str:
+        docstring = node.find("dd").get_text()
+        return re.sub(r"\n\n\n+", "\n\n", docstring).strip()
+
+    @staticmethod
+    def returns(node: Tag) -> str:
+        returns = node.find("span", class_="sig-return")
+        if returns:
+            return returns.get_text().strip()
         else:
             return ""
 
     @staticmethod
-    def overloads(doc: str, name: str) -> list[str]:
+    def overloads(docstring: str, name: str) -> list[str]:
         overloads: list[str] = []
-        while doc_contains_func := re.search(DOC_PATTERN(name), doc):
-            fn_def = doc_contains_func.group(1)
+        while docstring_contains_func := re.search(DOCSTRING_PATTERN(name), docstring):
+            fn_def = docstring_contains_func.group(1)
             # :: = C++ synthax
             if not "::" in fn_def:
                 ## HARD CODED (Alternative: exlude lines starting with >>>)
                 if not "EnumerateHeterocycles" in fn_def:
                     overloads.append(fn_def.strip())
-            _, doc = doc.split(fn_def, 1)
+            _, docstring = docstring.split(fn_def, 1)
         return overloads
 
     @staticmethod
@@ -130,26 +86,26 @@ class Find:
     def function(node: Tag) -> FoundFunction:
         name = Find.name(node)
         params = Find.params(node)
-        ret = Find.return_(node)
-        doc = Find.fn_doc(node)
+        returns = Find.returns(node)
+        doc = Find.func_docstring(node)
         overloads = Find.overloads(doc, name)
-        return FoundFunction(name, params, ret, doc, overloads)
+        return FoundFunction(name, params, returns, doc, overloads)
 
     @staticmethod
     def classes(node: Tag) -> list[FoundClass]:
         classes = node.findChildren("dl", class_="py class", recursive=False)
         exceptions = node.findChildren("dl", class_="py exception", recursive=False)
         classes = classes + exceptions
-        return [Find.class_(c) for c in classes]
+        return [Find.cls(c) for c in classes]
 
     @staticmethod
-    def class_(node: Tag) -> FoundClass:
+    def cls(node: Tag) -> FoundClass:
         name = Find.name(node)
 
         node = node.find("dd")
 
         base = Find.base(node)
-        doc = Find.doc(node, ["py method", "py attribute", "py class"])
+        doc = Find.docstring(node, ["py method", "py attribute", "py class"])
 
         methods = Find.functions(node, method=True)
         attributes = Find.attributes(node)
@@ -163,7 +119,7 @@ class Find:
         soup = BeautifulSoup(data, "html.parser")
         node = soup.find("section")
 
-        doc = Find.doc(node, ["py exception", "py class", "py function"])
+        doc = Find.docstring(node, ["py exception", "py class", "py function"])
 
         classes = Find.classes(node)
 

@@ -13,7 +13,10 @@ dependencies = [
     "mypy",
     "isort",
     "black",
-    "biopython"
+    "biopython",
+    "tqdm",
+    "bs4",
+    "requests"
 ]
 
 [project.urls]
